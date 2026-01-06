@@ -310,6 +310,7 @@ const GridTableInner = ({
                 <div
                   key={row.id}
                   data-index={virtualRow.index}
+                  ref={rowVirtualizer.measureElement}
                   className="flex airtable-row hover:bg-blue-50/30"
                   style={{
                     position: "absolute",

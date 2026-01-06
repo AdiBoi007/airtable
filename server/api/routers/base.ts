@@ -15,54 +15,40 @@ export const baseRouter = createTRPCRouter({
     create: protectedProcedure
         .input(z.object({ name: z.string().min(1) }))
         .mutation(async ({ ctx, input }) => {
-            // Ensure Demo User exists to satisfy Foreign Key constraint
-            await ctx.db.user.upsert({
-                where: { id: ctx.session.user.id },
-                update: {},
-                create: {
-                    id: ctx.session.user.id,
-                    name: ctx.session.user.name,
-                    email: ctx.session.user.email,
-                }
-            })
-
-            // Execute sequentially to avoid transaction timeouts
+            // Use nested writes to create everything in one go (Base -> Table -> Columns + View)
             const base = await ctx.db.base.create({
                 data: {
                     name: input.name,
                     ownerId: ctx.session.user.id,
+                    tables: {
+                        create: {
+                            name: "Table 1",
+                            columns: {
+                                create: [
+                                    { name: "Name", type: "text", order: 0 },
+                                    { name: "Notes", type: "text", order: 1 },
+                                    { name: "Status", type: "text", order: 2 },
+                                ]
+                            },
+                            views: {
+                                create: {
+                                    name: "Grid view",
+                                    config: { type: "grid" }
+                                }
+                            }
+                        }
+                    }
                 },
-            })
-
-            // Create default table
-            const table = await ctx.db.table.create({
-                data: {
-                    baseId: base.id,
-                    name: "Table 1",
-                }
-            })
-
-            // Create default columns
-            await ctx.db.column.createMany({
-                data: [
-                    { tableId: table.id, name: "Name", type: "text", order: 0 },
-                    { tableId: table.id, name: "Notes", type: "text", order: 1 },
-                    { tableId: table.id, name: "Status", type: "text", order: 2 },
-                ]
-            })
-
-            // Create default view
-            await ctx.db.view.create({
-                data: {
-                    tableId: table.id,
-                    name: "Grid view",
-                    config: { type: "grid" },
+                include: {
+                    tables: {
+                        take: 1
+                    }
                 }
             })
 
             return {
                 ...base,
-                defaultTableId: table.id
+                defaultTableId: base.tables[0].id
             }
         }),
 })

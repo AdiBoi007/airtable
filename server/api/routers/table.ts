@@ -33,30 +33,25 @@ export const tableRouter = createTRPCRouter({
                 throw new TRPCError({ code: "FORBIDDEN", message: "Unauthorized" })
             }
 
-            // Execute sequentially for better performance on non-pooled connections
+            // Use nested writes for atomic and fast creation
             const table = await ctx.db.table.create({
                 data: {
                     baseId: input.baseId,
                     name: input.name,
+                    columns: {
+                        create: [
+                            { name: "Name", type: "text", order: 0 },
+                            { name: "Notes", type: "text", order: 1 },
+                            { name: "Status", type: "text", order: 2 },
+                        ]
+                    },
+                    views: {
+                        create: {
+                            name: "Grid view",
+                            config: { type: "grid" }
+                        }
+                    }
                 },
-            })
-
-            // Create default columns
-            await ctx.db.column.createMany({
-                data: [
-                    { tableId: table.id, name: "Name", type: "text", order: 0 },
-                    { tableId: table.id, name: "Notes", type: "text", order: 1 },
-                    { tableId: table.id, name: "Status", type: "text", order: 2 },
-                ]
-            })
-
-            // Create default view
-            await ctx.db.view.create({
-                data: {
-                    tableId: table.id,
-                    name: "Grid view",
-                    config: { type: "grid" },
-                }
             })
 
             return table

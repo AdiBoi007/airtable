@@ -29,12 +29,15 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
+import { useSession, signOut } from "next-auth/react"
 
 interface TopHomeBarProps {
   onMenuClick: () => void
 }
 
 export function TopHomeBar({ onMenuClick }: TopHomeBarProps) {
+  const { data: session } = useSession()
+  const user = session?.user
 
   return (
     <header className="h-14 border-b border-gray-200 bg-white flex items-center justify-between px-4">
@@ -77,17 +80,21 @@ export function TopHomeBar({ onMenuClick }: TopHomeBarProps) {
           <DropdownMenuTrigger asChild>
             <Button variant="ghost" className="h-8 w-8 ml-2 p-0 rounded-full">
               <Avatar className="h-8 w-8 bg-green-600 cursor-pointer">
-                <AvatarFallback className="bg-green-600 text-white text-sm font-medium">
-                  D
-                </AvatarFallback>
+                {user?.image ? (
+                  <img referrerPolicy="no-referrer" src={user.image} alt={user.name || "User"} className="h-full w-full object-cover" />
+                ) : (
+                  <AvatarFallback className="bg-green-600 text-white text-sm font-medium">
+                    {user?.name?.[0] || "U"}
+                  </AvatarFallback>
+                )}
               </Avatar>
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end" className="w-72 p-0">
             {/* User info header */}
             <div className="px-4 py-3">
-              <p className="font-medium text-gray-900">Demo User</p>
-              <p className="text-sm text-gray-500">demo@example.com</p>
+              <p className="font-medium text-gray-900">{user?.name || "User"}</p>
+              <p className="text-sm text-gray-500">{user?.email}</p>
             </div>
             <DropdownMenuSeparator className="my-0" />
 
@@ -161,9 +168,12 @@ export function TopHomeBar({ onMenuClick }: TopHomeBarProps) {
                 <Trash2 className="h-4 w-4 mr-3 text-gray-500" />
                 <span>Trash</span>
               </DropdownMenuItem>
-              <DropdownMenuItem className="px-4 py-2.5 cursor-pointer">
+              <DropdownMenuItem
+                className="px-4 py-2.5 cursor-pointer"
+                onClick={() => signOut({ callbackUrl: "/auth" })}
+              >
                 <LogOut className="h-4 w-4 mr-3 text-gray-500" />
-                <span>Log out (Demo)</span>
+                <span>Log out</span>
               </DropdownMenuItem>
             </div>
           </DropdownMenuContent>

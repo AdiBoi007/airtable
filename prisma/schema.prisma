@@ -6,10 +6,11 @@ generator client {
 }
 
 datasource db {
-    provider = "postgresql"
+    provider  = "postgresql"
     // NOTE: When using mysql or sqlserver, relationMode = "prisma" is recommended for PlanetScale
     // but here we are using Postgres so default is fine.
-    url      = env("DATABASE_URL")
+    url       = env("DATABASE_URL")
+    directUrl = env("DIRECT_URL")
 }
 
 // NextAuth Models

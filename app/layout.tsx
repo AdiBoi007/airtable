@@ -24,9 +24,11 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <body className={`font-sans antialiased`}>
-        <TRPCReactProvider>
-          {children}
-        </TRPCReactProvider>
+        <NextAuthProvider>
+          <TRPCReactProvider>
+            {children}
+          </TRPCReactProvider>
+        </NextAuthProvider>
         <Analytics />
       </body>
     </html>
