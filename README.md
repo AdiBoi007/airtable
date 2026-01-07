@@ -2,8 +2,6 @@
 
 A high-performance, pixel-perfect clone of Airtable built with the modern **T3 Stack** (Next.js 16, Prisma, tRPC) and **Neon Serverless Postgres**.
 
-![Airtable Clone Preview](https://github.com/shadcn.png) *(Replace with actual screenshot if available)*
-
 ## ✨ Features
 
 - **⚡ Performance First**: Optimized with **Neon Connection Pooling** and **Prisma Nested Writes** for instant base and table creation (<10ms latency).
